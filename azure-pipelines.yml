@@ -10,9 +10,6 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- checkout: self
-  persistCredentials: true
-
 - task: Maven@4
   inputs:
     mavenPomFile: 'MavenHelloWorld-master/pom.xml'
@@ -23,10 +20,14 @@ steps:
     publishJUnitResults: true
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
     goals: 'package'
+
+# Copy the build output (target folder) to the artifact staging directory
 - task: CopyFiles@2
   inputs:
-    Contents: '**/.war'
-    TargetFolder: '$(build.artifactstagingdirectory)'
+    Contents: '**/target/*.jar'    # or **/target/*.war if it's a web project
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+# Publish the artifact so it can be downloaded later
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
